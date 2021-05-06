@@ -1,0 +1,45 @@
+#+TITLE:       AWS Notes       
+#+AUTHOR:      Richard Wilson
+#+DATE:        5/5/21
+
+#+OPTIONS: ^:{}
+#+OPTIONS: todo:nil
+
+* Create Athena table from file
+#+begin_src sql
+create external table if not exists database.table (
+  field1 string
+  ,field2 timestamp
+  ,field3 double
+  )
+ row format delimited
+  fields terminated by ','
+  escaped by '\\'
+  lines terminated by '\n'
+ location 
+  's3://S3_FOLDER_LOCATION_HERE_NOT_FILENAME/'
+ tblproperties(
+   "skip.header.line.count"="1" 
+   )
+  ;
+#+end_src
+* Misc
+** Finding S3 location of Athena tables
+https://aws.amazon.com/premiumsupport/knowledge-center/find-s3-source-file-athena-table-row/
+#+begin_src sql
+SELECT distinct "$path" FROM "database.table"
+#+end_src
+
+** Query Column Datatypes
+#+begin_src sql
+SELECT 
+ c.column_name
+ ,c.data_type
+FROM   
+ information_schema.columns c
+WHERE
+ c.table_schema = 'database'
+ AND c.table_name = 'table'
+ORDER BY
+ c.ordinal_position
+#+end_src

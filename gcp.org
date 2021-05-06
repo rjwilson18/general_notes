@@ -1,0 +1,17 @@
+#+TITLE:       GCP Notes       
+#+AUTHOR:      Richard Wilson
+#+DATE:        5/5/21
+
+#+OPTIONS: ^:{}
+#+OPTIONS: todo:nil
+
+* Storage
+** Create Bucket
+#+begin_src bash
+gsutil mb -p PROJECT_ID -c STORAGE_CLASS -l BUCKET_LOCATION -b on gs://BUCKET_NAME
+#+end_src
+** Storage Class
+STANDARD  - frequently accessed or only brief storage
+NEARLINE  - read or modify once per month or less
+COLDLINE  - read or modify once per quarter or less
+ARCHIVE   - read or modify once per year or less
