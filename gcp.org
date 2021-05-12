@@ -66,3 +66,27 @@ def blob_metadata(bucket_name, blob_name):
         )
 
 #+end_src
+* BigQuuery
+** Table Exists
+#+begin_src python
+from google.cloud import bigquery
+from google.cloud.exceptions import NotFound
+
+client = bigquery.Client()
+
+# TODO(developer): Set table_id to the ID of the table to determine existence.
+# table_id = "your-project.your_dataset.your_table"
+
+try:
+    client.get_table(table_id)  # Make an API request.
+    print("Table {} already exists.".format(table_id))
+except NotFound:
+    print("Table {} is not found.".format(table_id))
+#+end_src
+** Copy Table
+#+begin_src python
+copy_job = bqclient.copy_table(TEMP_TABLE_ID, TABLE_ID)
+print("Table " + TABLE_ID + " does not exist, performing copy operation")
+copy_job.result()  # Wait for the job to complete.
+print('Copied from {} into {} in {}'.format(TEMP_TABLE_ID, TABLE_ID, str(copy_job.ended - copy_job.started)) )
+#+end_src
