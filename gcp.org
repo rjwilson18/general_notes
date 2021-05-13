@@ -90,3 +90,8 @@ print("Table " + TABLE_ID + " does not exist, performing copy operation")
 copy_job.result()  # Wait for the job to complete.
 print('Copied from {} into {} in {}'.format(TEMP_TABLE_ID, TABLE_ID, str(copy_job.ended - copy_job.started)) )
 #+end_src
+* Instances
+** Poweroff from Python
+#+begin_src python
+os.system("sudo poweroff")
+#+end_src
