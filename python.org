@@ -1,0 +1,58 @@
+#+TITLE:       Python Notes
+#+AUTHOR:      Richard Wilson
+#+DATE:        
+
+#+OPTIONS: ^:{}
+#+OPTIONS: todo:nil
+
+* Pandas/Numpy
+** isnull / notnull
+#+begin_src python
+#Null
+df["new_field"] = np.where((pd.isnull(df["nullable_field"])),1,0) 
+#NotNull
+df["new_field"] = np.where((pd.notnull(df["nullable_field"])),1,0)
+#+end_src
+** Import SAS file
+file_path = test.sas7bdat
+df = pd.read_sas(file_path)
+** Pivot DF
+#+begin_src python
+value_field = ['field_to_aggragate']
+pivot_row_list = ['field1','field2']
+pivot_column_list = ['field3']
+df1 = pd.pivot_table(df, values = value_field, index=pivot_row_list,columns=pivot_column_list, aggfunc=np.sum, fill_value=0) 
+#+end_src
+** Drop Duplicates
+#+begin_src python
+field_list = ['field1','field2']
+df.drop_duplicates(subset = field_list, ignore_index = True, inplace = True)
+#+end_src
+** Abolute Value
+#+begin_src python
+df['abs_field_result'] = abs(df['field1'] - df['field2])
+#+end_src
+** Filter multiple conditions
+#+begin_src python
+df1 = df[(df['field1'] > x) & (df['field2'] < y)]
+#+end_src
+* Pip
+** SSL Certificate Error
+I was getting this error:
+
+#+begin_src 
+ERROR: Could not install packages due to an OSError: HTTPSConnectionPool(host='files.pythonhosted.org', port=443): Max retries exceeded with url: /packages/74/8c/9cf2e5304f4466dbc759a799b97bfd75cd3dc93b00d49558ca93bfc29173/pandas-1.2.4-cp37-cp37m-win_amd64.whl (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1091)')))
+#+end_src
+
+This workaround "fixed" it:
+
+#+begin_src bash
+python -m pip install -U pandas --user --trusted-host pypi.org --trusted-host files.pythonhosted.org
+#+end_src
+* Dates
+** Months Between (DF)
+#+begin_src python
+df['months'] = np.rint(((df.date1 - df.date2)/np.timedelta64(1, 'M'))).astype(int)
+#+end_src
+* DB Connections
+** SQL Server

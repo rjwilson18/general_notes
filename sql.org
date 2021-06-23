@@ -11,5 +11,11 @@
 #+begin_src sql
 ALTER USER userid IDENTIFIED BY "new_pw" REPLACE "old_pw";
 #+end_src
+** Check PW expiration
+#+begin_src sql
+SELECT *
+FROM 
+ sys.USER_USERS
+#+end_src
 * SQL Server
 * Postrges

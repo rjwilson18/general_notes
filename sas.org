@@ -1,0 +1,96 @@
+#+TITLE:       SAS Notes      
+#+AUTHOR:      Richard Wilson
+#+DATE:        
+
+#+OPTIONS: ^:{}
+#+OPTIONS: todo:nil
+
+* Importing Files
+** CSV
+#+begin_src 
+/*import file*/
+proc import 
+ out= work.data
+datafile= "&file_path.\&file_name."
+dbms=csv
+replace
+;
+run;
+#+end_src
+** Check for versioned file, but timestamp varies
+#+begin_src 
+/*calculate today's date variables*/
+data _null_;
+ref = today();
+call symputx('month_name',put(ref,monname.));
+call symputx('day',put(ref,day.));
+call symputx('year',put(ref,year.));
+run;
+
+/*print macro vars*/
+%put Today is &month_name. &day., &year.;
+
+/*determine the name of today's file*/
+data _null_;
+  length fname $256 ;
+  infile "FILE_PATH_HERE\FILE_NAME_&month_name._&day._&year._*.csv"
+          obs=1 filename=fname
+  ;
+  input;
+  call symputx('fname',fname);
+run;
+
+/*import file*/
+proc import 
+ out= work.sales_survey
+ datafile= "&fname."
+ dbms=csv
+ replace
+;
+run;
+#+end_src
+** filename alphabetically
+#+begin_src 
+filename myDir "C:\_DIRECTORY_HERE" ;
+
+data work.file_list (keep=filename);
+	did=dopen("myDir") ;
+	filecount=dnum(did) ;
+	do i=1 to filecount ;
+		filename=dread(did,i) ;
+		put filename= ;
+		output ;
+	end ;
+	rc=dclose(did) ;
+run ;
+
+proc sort 
+ data=work.file_list (where=filename like "%_string_here.csv")
+ ;
+by descending filename;
+run;
+
+data work.data;
+set work.file_list;
+if _n_ = 1 then do;
+ output;
+ call symputx('import_filename',filename);
+end;
+run;
+
+%put &import_filename.;
+
+#+end_src
+* Proc SQL
+** Select into macro variable
+#+begin_src 
+proc sql noprint;
+select distinct 
+ "'" || string_value || "'" into :macro_var_list separated by ','
+from 
+ table
+;
+quit;
+
+%put &macro_var_list.;
+#+end_src
