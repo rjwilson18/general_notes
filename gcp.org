@@ -90,8 +90,111 @@ print("Table " + TABLE_ID + " does not exist, performing copy operation")
 copy_job.result()  # Wait for the job to complete.
 print('Copied from {} into {} in {}'.format(TEMP_TABLE_ID, TABLE_ID, str(copy_job.ended - copy_job.started)) )
 #+end_src
+** Check all columns for null
+#+begin_src sql
+SELECT col_name, COUNT(1) nulls_count
+FROM `project.dataset.table` t,
+UNNEST(REGEXP_EXTRACT_ALL(TO_JSON_STRING(t), r'"(\w+)":null')) col_name
+GROUP BY col_name 
+#+end_src
+** Delimited column header
+#+begin_src python
+col_query = '''
+select 
+ col.column_name
+from 
+ `{0}.{1}.INFORMATION_SCHEMA.COLUMNS` col
+where 
+ col.table_name = '{2}'
+order by 
+ col.column_name
+'''.format(PROJECT_ID, DATASET_ID, INPUT_TABLE_NAME)
+
+COLUMN_LIST = pandas_gbq.read_gbq(col_query,project_id=PROJECT_ID,use_bqstorage_api=True)
+
+HEADER_LIST = COLUMN_LIST.astype(str).values.flatten().tolist()
+HEADER_STRING = '|'.join(HEADER_LIST)
+print(HEADER_STRING)
+#+end_src
 * Instances
 ** Poweroff from Python
 #+begin_src python
 os.system("sudo poweroff")
+#+end_src
+
+* Dataflow
+** SQL to TXT
+#+begin_src python
+
+from __future__ import division
+import apache_beam as beam
+from apache_beam.io import ReadFromBigQuery, WriteToText
+from apache_beam.options.pipeline_options import PipelineOptions, GoogleCloudOptions, StandardOptions, SetupOptions, WorkerOptions
+import logging
+######################################
+#        Pipeline Configuration      #
+######################################
+#Set options for pipeline
+pipeline_options = PipelineOptions(
+      runner='DataflowRunner',
+      project='PROJECT_ID',
+      job_name='JOBNAME',
+      region='us-east4',
+      subnetwork= 'SUBNETWORK',
+      use_public_ips=False,
+      staging_location = 'gs://STAGING_LOCATION/',
+      temp_location = 'gs://TEMP_LOCATION',
+      machine_type = "n1-standard-1",
+      max_num_workers = 30,
+      autoscaling_algorithm='THROUGHPUT_BASED'#None
+     )
+
+#Set options for the file to be exported
+DESTINATION_FILE_CONFIG = {
+    'file_path_prefix' : 'gs://PATH_HERE'
+    ,'file_name_suffix' : '.txt'
+    ,'num_shards' : 1 # number of files to be created
+    ,'header' : HEADER_STRING
+   }
+
+
+#ParDo class
+class JoiningDoFn2(beam.DoFn):
+    # Do lazy initializaiton here. Otherwise, error messages pop up, associated with "A large DoFn instance that is serialized for transmission to remote workers.""
+    def __init__(self):
+        import pandas as pd
+	self.pd = pd
+    def process(self,dic):
+       return ['|'.join(str(x) for x in dic.values())]
+
+ ######################################
+ #               Pipeline             #
+ ######################################
+
+class DataFlowPipeline:
+    """THIS IS THE CLASS THAT ACTUALLY RUNS THE JOB"""
+
+    def run(self):
+        """This is the job runner it holds the beam pipeline"""
+        with beam.Pipeline(options=pipeline_options) as p:
+	    pull_table_query =  """
+	     select *
+	     from 
+	     {0}        
+	    """.format(INPUT_TABLE_ID)
+
+	#Driver averaging pipeline
+	ent_modeling = p | 'read table' >> beam.io.Read(beam.io.ReadFromBigQuery(query=pull_table_query, use_standard_sql=True))  \
+	                 | 'ParDo' >> beam.ParDo(JoiningDoFn2())  \
+		         | 'Write Result to file' >> beam.io.WriteToText(**DESTINATION_FILE_CONFIG)
+
+######################################
+#              Main                  #
+######################################
+if __name__ == "__main__":
+    logging.getLogger().setLevel(logging.INFO)
+    print('setting up config for runner...')
+    trainer = DataFlowPipeline()
+    trainer.run()
+    print('The runner is done!')
 #+end_src
