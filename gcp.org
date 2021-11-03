@@ -126,6 +126,7 @@ HEADER_STRING = '|'.join(HEADER_LIST)
 print(HEADER_STRING)
 #+end_src
 ** Dedupe Table
+*** Method 1
 #+begin_src python
 #Check for duplicates
 query = '''
@@ -152,6 +153,19 @@ if ~np.where(query_results['row_count'] == query_results['distinct_row_count'],T
     results = dedupe_query_job.result()
     query_results = pandas_gbq.read_gbq(query,project_id=GCP_PROJECT,use_bqstorage_api=True)
     print(query_results)
+#+end_src
+*** Method 2
+This method is faster and more memory conscious so it is better for larger tables.
+It can also better incorporate a where clause for partial deduping.
+#+begin_src sql
+MERGE `transactions.testdata` t
+USING (
+  SELECT DISTINCT *
+  FROM `transactions.testdata`
+)
+ON FALSE
+WHEN NOT MATCHED BY SOURCE THEN DELETE
+WHEN NOT MATCHED BY TARGET THEN INSERT ROW
 #+end_src
 ** Shell Commands
 | Function       | Results              |
