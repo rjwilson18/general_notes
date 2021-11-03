@@ -67,6 +67,15 @@ def blob_metadata(bucket_name, blob_name):
 
 #+end_src
 * BigQuuery
+** Dataset Exists
+#+begin_src python
+dataset = bq.Dataset(DATASET_ID)
+
+try:
+    dataset = bqclient.create_dataset(dataset)
+except:
+    print("Dataset " + DATASET_ID + " already exists")
+#+end_src
 ** Table Exists
 #+begin_src python
 from google.cloud import bigquery
@@ -115,6 +124,34 @@ COLUMN_LIST = pandas_gbq.read_gbq(col_query,project_id=PROJECT_ID,use_bqstorage_
 HEADER_LIST = COLUMN_LIST.astype(str).values.flatten().tolist()
 HEADER_STRING = '|'.join(HEADER_LIST)
 print(HEADER_STRING)
+#+end_src
+** Dedupe Table
+#+begin_src python
+#Check for duplicates
+query = '''
+select 
+ count(1) as row_count
+ ,count(distinct *) as distinct_row_count
+from 
+ `{0}` 
+'''.format(TABLE_ID)
+
+# run query using panda_gbq, project_id is the location of the tools project.  data location is set in the query string
+query_results = pandas_gbq.read_gbq(query,project_id=GCP_PROJECT,use_bqstorage_api=True)
+print(query_results)
+
+if ~np.where(query_results['row_count'] == query_results['distinct_row_count'],True,False):
+    print('duplicates found. deduping....')
+    dedupe_query = '''
+     create or replace table `{0}` as 
+     select distinct * from `{0}`; 
+    '''.format(TABLE_ID)
+    
+    #dedupe then rerun dupe check
+    dedupe_query_job = bqclient.query(dedupe_query)
+    results = dedupe_query_job.result()
+    query_results = pandas_gbq.read_gbq(query,project_id=GCP_PROJECT,use_bqstorage_api=True)
+    print(query_results)
 #+end_src
 ** Shell Commands
 | Function       | Results              |
