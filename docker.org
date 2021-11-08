@@ -1,0 +1,44 @@
+#+TITLE:       Docker Notes
+#+AUTHOR:      Richard Wilson
+#+DATE:        
+
+#+OPTIONS: ^:{}
+#+OPTIONS: todo:nil
+
+* Base Template
+** Python
+#+begin_src docker
+FROM python:3.8-slim-buster
+
+#Copy needed files
+COPY src .
+COPY requirements.txt .
+
+#install needed python libraries
+RUN pip install -r requirements.txt
+
+#Update apt and install PACKAGE
+RUN apt update
+RUN apt upgrade -y
+RUN apt-get install PACKAGE -y
+
+#test variable
+ENV input_file=test.txt
+
+CMD python script.py ${input_file}
+
+#+end_src
+* Bash Commands
+| Purpose    | Command                                                  |
+|------------+----------------------------------------------------------|
+| Enter Bash | docker run --rm -it --entrypoint bash <image-name-or-id> |
+
+* Installing Linux Packages
+The command for installing packages is the same as normal in linux,
+but it seems to work best to install packages after running an update.
+
+#+begin_src docker
+RUN apt update
+RUN apt upgrade -y
+RUN apt-get install PACKAGE -y
+#+end_src

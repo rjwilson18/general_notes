@@ -66,7 +66,32 @@ def blob_metadata(bucket_name, blob_name):
         )
 
 #+end_src
-* BigQuuery
+** FIle Movement
+*** Large files Upload
+This command uses the gsutil to upload files in parallel.
+This can be used on one large file or a group of files.
+
+Arguments: //
+-n prevents overwriting existing files //
+-m performs parallel multi-threading/processing for more than 1 file.
+-o GSUtil:parallel_composite_upload_threshold=150M breaks large files into chunks of declared size and uploads them in parallel.
+#+begin_src bash
+gsutil -o GSUtil:parallel_composite_upload_threshold=150M -m cp -n src gs://dest
+#+end_src
+
+or in Python
+#+begin_src python
+filename='myfile.csv'
+gs_bucket='my/bucket'
+parallel_threshold='150M' # minimum size for parallel upload; 0 to disable
+
+subprocess.check_call([
+  'gsutil',
+  '-o', 'GSUtil:parallel_composite_upload_threshold=%s' % (parallel_threshold,),
+  'cp', filename, 'gs://%s/%s' % (gs_bucket, filename)
+])
+#+end_src
+* BigQuery
 ** Dataset Exists
 #+begin_src python
 dataset = bq.Dataset(DATASET_ID)
@@ -98,6 +123,13 @@ copy_job = bqclient.copy_table(TEMP_TABLE_ID, TABLE_ID)
 print("Table " + TABLE_ID + " does not exist, performing copy operation")
 copy_job.result()  # Wait for the job to complete.
 print('Copied from {} into {} in {}'.format(TEMP_TABLE_ID, TABLE_ID, str(copy_job.ended - copy_job.started)) )
+#+end_src
+** Snapshot Table
+Requires IAM Permissions: bigquery.tables.createSnapshot, bigquery.tables.get, bigquery.tables.getData
+
+#+begin_src sql
+create snapshot table `SNAPSHOT_TABLE_ID`
+clone `TABLE_ID`;
 #+end_src
 ** Check all columns for null
 #+begin_src sql
@@ -168,9 +200,15 @@ WHEN NOT MATCHED BY SOURCE THEN DELETE
 WHEN NOT MATCHED BY TARGET THEN INSERT ROW
 #+end_src
 ** Shell Commands
-| Function       | Results              |
-|----------------+----------------------|
-| Create Dataset | bq mk <dataset_name> |
+| Function       | Command                                                                                                                                    |
+|----------------+--------------------------------------------------------------------------------------------------------------------------------------------|
+| Create Dataset | gcloud alpha bq datasets create <dataset-name>  --description '<description>' --if-exists 'overwrite'                                      |
+| List Datasets  | gcloud alpha bq datasets list --all                                                                                                        |
+| Delete Dataset | gcloud alpha bq datasets delete <dataset-name>                                                                                             |
+| Copy Table     | gcloud alpha bq tables copy --source <table_name1> --destination <table_name2 --source-dataset <dataset1> --destination-dataset <dataset2> |
+| Delete Table   | gcloud alpha bq tables delete <table-name>  --dataset=<dataset-name>                                                                       |
+| Preview Table  | gcloud alpha bq tables show-rows --table <table_name> --limit <x> --start <y>                                                              |
+| List Tables    | gcloud alpha bq tables list --dataset <dataset-name>                                                                                       |
 * Instances
 ** Poweroff from Python
 #+begin_src python
