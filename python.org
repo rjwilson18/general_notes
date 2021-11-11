@@ -36,6 +36,10 @@ df['abs_field_result'] = abs(df['field1'] - df['field2])
 #+begin_src python
 df1 = df[(df['field1'] > x) & (df['field2'] < y)]
 #+end_src
+** Dataframe Row Count
+#+begin_src python
+len(df.index)
+#+end_src
 * Pip
 ** SSL Certificate Error
 I was getting this error:

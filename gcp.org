@@ -199,6 +199,23 @@ ON FALSE
 WHEN NOT MATCHED BY SOURCE THEN DELETE
 WHEN NOT MATCHED BY TARGET THEN INSERT ROW
 #+end_src
+** Table Metadata
+#+begin_src sql
+  select 
+   t.project_id
+   ,t.dataset_id
+   ,table_id
+   ,timestamp_millis(t.creation_time) as creation_time
+   ,timestamp_millis(t.last_modified_time) as last_modified_time
+   ,t.row_count
+   ,t.size_bytes * .000000000931 as size_gb
+   ,case when type = 1 then 'table'
+	 when type = 2 then 'view'
+	 else null end as type
+  from 
+   `TABLE_ID`.__TABLES__ t
+
+#+end_src
 ** Shell Commands
 | Function       | Command                                                                                                                                    |
 |----------------+--------------------------------------------------------------------------------------------------------------------------------------------|
@@ -214,7 +231,6 @@ WHEN NOT MATCHED BY TARGET THEN INSERT ROW
 #+begin_src python
 os.system("sudo poweroff")
 #+end_src
-
 * Dataflow
 ** SQL to TXT
 #+begin_src python
@@ -380,7 +396,6 @@ with models.DAG(
    # Define DAG dependencies.
     check_file_existence >> create_dataproc_cluster >> run_dataproc_hadoop >> delete_dataproc_cluster
 #+end_src
-
 
 
 * PubSub
