@@ -60,3 +60,8 @@ df['months'] = np.rint(((df.date1 - df.date2)/np.timedelta64(1, 'M'))).astype(in
 #+end_src
 * DB Connections
 ** SQL Server
+* Jupyter
+** Convert to Script
+#+begin_src bash
+jupyter nbconvert --to script FILE_NAME.ipynb
+#+end_src
