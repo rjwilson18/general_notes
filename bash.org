@@ -1,0 +1,33 @@
+#+TITLE:       Bash Notes
+#+AUTHOR:      Richard Wilson
+#+DATE:        
+
+#+OPTIONS: ^:{}
+#+OPTIONS: todo:nil
+
+
+
+* Run Files
+#+begin_src bash
+#!/bin/src
+
+credit_file_location="GCS_LOCATION"
+blob_list=($(gsutil ls $credit_file_location))
+
+for i in ${!blob_list[@]}; do
+  file_index=$(expr $i + 1)
+  timestamp=$(date +"%Y_%m_%d__%H:%M:%S")
+  echo "Processing file $file_index of ${#blob_list[@]}"
+  blob=${blob_list[$i]}
+  file_name=$(echo $blob | awk -F/ '{print $NF}')
+  if [[ $blob == *"ACC"* ]]; then
+   echo "$blob is being processed as an ACCEPT file"
+   python accepts.py $blob >> "logs/${file_name}_${timestamp}.log"
+  elif [[ $blob == *"REJ"* ]]; then
+   echo "$blob is being processed as a REJECT file" 
+   python rejects.py $blob >> "logs/${file_name}_${timestamp}.log"
+  else 
+   echo "$blob filename is not formatted as a credit file and is being ignored"
+  fi
+done
+#+end_src

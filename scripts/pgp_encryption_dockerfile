@@ -1,0 +1,23 @@
+FROM python:3.8-slim-buster
+
+#Copy needed files
+COPY pgp_encryption.py .
+COPY requirements.txt .
+COPY key/key.asc key.asc
+
+#install needed python libraries
+RUN pip install -r requirements.txt
+
+#Update apt and install gnupg
+RUN apt update
+RUN apt upgrade -y
+RUN apt-get install gnupg -y
+
+#import and establish key is trusted
+RUN gpg --import key.asc
+
+
+#test variable
+ENV input_file=test.txt
+
+CMD python tu_encryption.py ${input_file}
