@@ -159,14 +159,18 @@ print(HEADER_STRING)
 #+end_src
 ** Dedupe Table
 *** Method 1
+This method does not work on partitioned/clustered tables. Option 2 is almost certainly the better method.
 #+begin_src python
 #Check for duplicates
 query = '''
+with distinct_rows as(
+ select distinct * 
+ from {0}
+)
 select 
- count(1) as row_count
- ,count(distinct *) as distinct_row_count
-from 
- `{0}` 
+ (select count(1) from {0}) as row_count
+ ,(select count(1) from distinct_rows) as distinct_row_count
+
 '''.format(TABLE_ID)
 
 # run query using panda_gbq, project_id is the location of the tools project.  data location is set in the query string
@@ -187,7 +191,7 @@ if ~np.where(query_results['row_count'] == query_results['distinct_row_count'],T
     print(query_results)
 #+end_src
 *** Method 2
-This method is faster and more memory conscious so it is better for larger tables.
+This method is supposedly faster and works on partitioned/clustered tables.
 It can also better incorporate a where clause for partial deduping.
 #+begin_src sql
 MERGE `transactions.testdata` t
