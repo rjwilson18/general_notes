@@ -1,0 +1,34 @@
+#+TITLE:       Git Notes
+#+AUTHOR:      Richard Wilson
+#+DATE:        
+
+#+OPTIONS: ^:{}
+#+OPTIONS: todo:nil
+
+* Misc.
+** Moving files from one repo to another keeping history
+
+This method worked:
+#+begin_src bash
+gitcp <Repo1_basedir> <path_inside_repo1> <Repo2_basedir>
+
+gitcp ()
+{
+    fromdir="$1";
+    frompath="$2";
+    to="$3";
+    echo "Moving git files from "$fromdir" at "$frompath" to "$to" ..";
+    tmpdir=/tmp/gittmp;
+    cd "$fromdir";
+    git format-patch --thread -o $tmpdir --root -- "$frompath";
+    cd "$to";
+    git am $tmpdir/*.patch
+}
+#+end_src
+
+This method didn't seem to use the most current commits, tried removing reverse but it failed.
+#+begin_src bash
+git log --pretty=email --patch-with-stat --reverse -- path/to/file_or_folder | (cd /path/to/new_repository && git am --committer-date-is-author-date)
+#+end_src
+
+then move, and add files finally commit
