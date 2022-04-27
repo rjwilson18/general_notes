@@ -41,6 +41,18 @@ df1 = df[(df['field1'] > x) & (df['field2'] < y)]
 len(df.index)
 #+end_src
 * Pip
+** Upgrade Libraries
+*** Upgrade Individually
+*** Upgrade All
+Linux:
+#+begin_src bash
+pip3 list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1 | xargs -n1 pip3 install -U 
+#+end_src
+
+Windows:
+#+begin_src powershell
+pip freeze | %{$_.split('==')[0]} | %{pip install --upgrade $_}
+#+end_src
 ** SSL Certificate Error
 I was getting this error:
 
