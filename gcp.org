@@ -66,7 +66,7 @@ def blob_metadata(bucket_name, blob_name):
         )
 
 #+end_src
-** FIle Movement
+** File Movement
 *** Large files Upload
 This command uses the gsutil to upload files in parallel.
 This can be used on one large file or a group of files.

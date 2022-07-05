@@ -1,0 +1,112 @@
+#+TITLE:       GCP Study Guide
+#+AUTHOR:      Richard Wilson
+#+DATE:        
+
+#+OPTIONS: ^:{}
+#+OPTIONS: todo:nil
+
+
+* Introduction
+** What is cloud computing
+*** On demand self-service
+No human intervention needed to get resources
+*** Broad network access
+Access from anywhere
+*** Resource pooling
+Provider shares resources to customers
+*** Rapid elasticity
+Get more resources quickly as needed, when you need less scale back.
+*** Measured Serve
+Pay for what you consume
+** Computing Architectures
+*** IaaS
+Infrastructure as a service, i.e compute engine
+
+Compute, storage, and network organized in ways thate are familiar in both physical and virtual data centers.
+
+Pay for what you allocate.
+*** Paas
+Platform as a service, i.e. app engine
+
+Binds your code to libraries that provide access to the infrastructure the application needs. 
+Lets you focus on application logic.
+
+Pay for what you use.
+*** Iaas PaaS Hybrid
+Mix of IaaS and PaaS, i.e. Kubernetes engine
+*** Serverless logic
+Does not require infrastructure allocation, i.e. cloud function
+*** Managed Services
+Automated elastic resources.
+** Data Center Organization
+*** Regions
+Independent geographic areas consisting of zones. 
+
+As of 5/20/22 there are 32 regions.
+
+**** Services with multi-regional deployment
+1. App Engine
+2. Datastore
+3. Storage
+4. BigQuery
+
+*** Zones
+Deployment area for GCP resources within a region.
+Single failure domain within a region.
+Fault tolerant apps with high availability need to deploy across multiple zones.
+
+As of 5/20/22 there are 97 zones.
+
+** Billing
+*** Ways GCP 
+**** Billing in sub-hour increments
+Instance resources billed for per-second use.
+**** Discounts for sustained use
+Discount automatically applied for VMs with use of over 25%/month
+**** Discounts for committed use
+Pay less for steady, long-term workloads
+**** Discounts for preemtible use
+Pay less for interruptible workloads
+**** Custom VM instance types
+** Open APIs
+i.e: Bigtable uses Apache HBase
+** Security
+*** Operations
+Intrusion detection \\
+Techniques to reduce insider risk \\
+employee U2F use \\
+software development practices
+*** Internet Communication
+Google Front End (GFE) \\
+Denial of Service (DOS) protection
+*** Storage Services
+Encryption at rest
+*** User Identity
+Central identity service with support for U2F
+*** Service Deployment
+Encryption of inter-service communication
+*** Hardware Infrastrcuture
+Hardware design and provenance \\
+secure boot stack \\
+premises security
+
+* Getting Started with GCP
+** Security Responsibilities
+Google handles lower layers, user handles upper layers. \\
+
+Google: \\
+ Hardware \\
+ Encryption \\
+ Network Integrity \\
+Customer: \\
+ IAM
+** Organization
+
+*** 1. Org Node 
+
+*** 2. Folders  (optional)
+*** 3. Projects 
+*** 4. Resources 
+VMs, Storage, etc \\
+All resources must belong to a project.
+ 
