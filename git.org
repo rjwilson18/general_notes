@@ -5,6 +5,19 @@
 #+OPTIONS: ^:{}
 #+OPTIONS: todo:nil
 
+* Settings
+** Change default branch name
+#+begin_src bash
+#existing repo assuming you are in main/master
+git branch -m <>
+
+#global
+git config --global init.defaultBranch main
+#+end_src
+** Display all modified files including those in directories
+#+begin_src bash
+git config --global status.showUntrackedFiles all
+#+end_src
 * Misc.
 ** Moving files from one repo to another keeping history
 
