@@ -45,3 +45,8 @@ git log --pretty=email --patch-with-stat --reverse -- path/to/file_or_folder | (
 #+end_src
 
 then move, and add files finally commit
+
+** Remove files from Git deleted locally
+#+begin_src bash
+git ls-files --deleted | xargs git rm
+#+end_src
